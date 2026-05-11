@@ -11,6 +11,17 @@
 -- avg_recovery_ratio recoveries / funded on defaulted loans — lender recoupment rate
 --
 -- Export: SELECT * FROM vw_loan_performance_drivers ORDER BY grade, purpose, term;
+--
+-- Tableau usage notes:
+--   default_rate_pct  — use directly only when all three dimensions (grade, purpose, term)
+--                       are present in the view so no rows are being rolled up.
+--                       When collapsing dimensions, use a calculated field instead:
+--                       SUM([Default Count]) / SUM([Total Loans]) * 100
+--   avg_return_ratio, avg_recovery_ratio, avg_int_rate, avg_loan_amnt,
+--   avg_interest_collected, avg_principal_collected
+--                     — AVG aggregation (pre-computed averages; SUM is meaningless)
+--   default_count, total_loans — SUM aggregation
+--   total_funded_amnt, total_collected — SUM aggregation
 
 CREATE OR REPLACE VIEW vw_loan_performance_drivers AS
 SELECT

@@ -8,6 +8,17 @@
 --                        as % of ALL loans — captures stress in active loans too
 --
 -- Export: SELECT * FROM vw_risk_tier_delinquency ORDER BY grade, fico_tier, dti_bucket;
+--
+-- Tableau usage notes:
+--   default_rate_pct, delinquency_rate_pct
+--                     — use directly only when all three dimensions (grade, fico_tier, dti_bucket)
+--                       are present in the view so no rows are being rolled up.
+--                       When collapsing dimensions, use calculated fields instead:
+--                       SUM([Default Count]) / SUM([Total Loans]) * 100
+--                       SUM([Delinquent Count]) / SUM([Total Loans]) * 100
+--   default_count, delinquent_count, total_loans — SUM aggregation
+--   total_funded_amnt — SUM aggregation
+--   avg_int_rate, avg_loan_amnt — AVG aggregation (pre-computed averages; SUM is meaningless)
 
 CREATE OR REPLACE VIEW vw_risk_tier_delinquency AS
 SELECT

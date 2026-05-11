@@ -5,6 +5,16 @@
 -- so default_rate_pct reflects resolved outcomes, not in-progress loans.
 --
 -- Export: SELECT * FROM vw_borrower_default_profile ORDER BY fico_tier, income_bracket, dti_bucket;
+--
+-- Tableau usage notes:
+--   default_rate_pct  — use directly only when all three dimensions (fico_tier, income_bracket,
+--                       dti_bucket) are present in the view so no rows are being rolled up.
+--                       When collapsing dimensions (e.g. a bar chart by fico_tier only), create
+--                       a calculated field instead: SUM([Default Count]) / SUM([Total Loans]) * 100
+--   default_count     — SUM aggregation
+--   total_loans       — SUM aggregation
+--   avg_fico, avg_dti, avg_int_rate, avg_loan_amnt, avg_total_pymnt, avg_annual_inc
+--                     — AVG aggregation (these are pre-computed averages; SUM is meaningless)
 
 CREATE OR REPLACE VIEW vw_borrower_default_profile AS
 SELECT
