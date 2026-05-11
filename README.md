@@ -40,7 +40,7 @@
 The raw CSV is excluded from version control due to size. See **Section 6** for download instructions.
 
 **Notable data characteristics:**
-- FICO scores range from 612–850 in this dataset — the bottom tier (<600) is empty
+- FICO scores range from 610–850 in this dataset — the bottom tier (<600) is empty
 - `loan_status` contains 7 distinct values post-cleaning: Fully Paid, Charged Off, Default, Current, In Grace Period, Late (16-30 days), Late (31-120 days)
 - `int_rate` and `revol_util` are stored as percentage strings in the raw CSV and converted to floats during ETL
 - `term` is stored as " 36 months" / " 60 months" in the raw CSV and converted to integers during ETL
@@ -74,7 +74,8 @@ loan_performance_analysis_april_may_2025/
 │   └── vw_loan_performance_drivers.sql       # Dashboard 3 view
 ├── src/
 │   ├── etl_load.py                           # Loads raw CSV into PostgreSQL
-│   └── export_views.py                       # Exports SQL views to CSVs
+│   ├── export_views.py                       # Exports SQL views to CSVs
+│   └── sanity_check.py                       # Data integrity checks against the DB and views
 ├── reports/
 │   ├── figures/                              # Chart exports
 │   └── tables/                              # Summary tables
