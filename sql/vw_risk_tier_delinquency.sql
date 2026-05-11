@@ -17,8 +17,7 @@ SELECT
         WHEN fico_range_low >= 750 THEN '1. Prime (750+)'
         WHEN fico_range_low >= 700 THEN '2. Near-Prime (700-749)'
         WHEN fico_range_low >= 650 THEN '3. Subprime (650-699)'
-        WHEN fico_range_low >= 600 THEN '4. Deep Subprime (600-649)'
-        ELSE                             '5. Very High Risk (<600)'
+        ELSE                             '4. Deep Subprime (600-649)'
     END AS fico_tier,
 
     CASE
