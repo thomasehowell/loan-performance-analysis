@@ -14,7 +14,7 @@
 **Business Value:** Clear risk segmentation enables better underwriting decisions, more accurate pricing of credit risk, and earlier identification of at-risk borrowers.
 
 **Deliverables:**
-- PostgreSQL database containing cleaned, analysis-ready loan data (~30 columns selected from 151)
+- PostgreSQL database containing cleaned, analysis-ready loan data (30 columns selected from 151)
 - SQL views pre-aggregating key metrics for each analytical question
 - Three Tableau dashboards: Borrower Risk Profile, Risk Tier Segmentation, Key Performance Drivers
 
@@ -26,7 +26,7 @@
 
 **Source:** [LendingClub Dataset Full 2007–2018 via Kaggle](https://www.kaggle.com/datasets/panchammahto/lendingclub-dataset-full-2007-to-2018)
 
-**Size:** ~1.6 GB, 151 columns, approximately 2.2 million loan records
+**Size:** ~1.6 GB, 151 columns, 2,260,668 loan records (post-cleaning)
 
 **Key variable groups retained for analysis:**
 
@@ -39,30 +39,46 @@
 
 The raw CSV is excluded from version control due to size. See **Section 6** for download instructions.
 
+**Notable data characteristics:**
+- FICO scores range from 612–850 in this dataset — the bottom tier (<600) is empty
+- `loan_status` contains 7 distinct values post-cleaning: Fully Paid, Charged Off, Default, Current, In Grace Period, Late (16-30 days), Late (31-120 days)
+- `int_rate` and `revol_util` are stored as percentage strings in the raw CSV and converted to floats during ETL
+- `term` is stored as " 36 months" / " 60 months" in the raw CSV and converted to integers during ETL
+
 ## 4. Major Project Steps
 
 1. Exploratory data analysis (EDA) — column profiling, null rates, distribution review
-2. ETL — Python script reads raw CSV in chunks, selects relevant columns, loads to PostgreSQL
-3. SQL — schema definition, data cleaning views, analytical aggregation views
-4. Tableau — three dashboards built from exported CSV views
-5. Documentation and GitHub publication
+2. ETL — Python script reads raw CSV in 50,000-row chunks, selects 30 columns, cleans types, loads to PostgreSQL
+3. SQL — indexes for query performance, three analytical views aggregated for Tableau
+4. CSV export — Python script queries each view and writes to `data/processed/`
+5. Tableau — three dashboards built from the exported CSVs
+6. Documentation and GitHub publication
 
 ## 5. Project Structure
 
 ```
 loan_performance_analysis_april_may_2025/
 ├── data/
-│   ├── raw/              # Raw CSV (excluded from git — see Section 6)
-│   ├── interim/          # Intermediate outputs
-│   └── processed/        # Aggregated CSVs exported for Tableau
+│   ├── raw/                                  # Raw CSV (excluded from git — see Section 6)
+│   ├── interim/                              # Intermediate outputs
+│   └── processed/
+│       ├── borrower_default_profile.csv      # Tableau Dashboard 1
+│       ├── risk_tier_delinquency.csv         # Tableau Dashboard 2
+│       └── loan_performance_drivers.csv      # Tableau Dashboard 3
 ├── notebooks/
-│   └── EDA.ipynb         # Exploratory data analysis
-├── sql/                  # Schema DDL and analytical views
-├── src/                  # Python ETL scripts
+│   └── EDA.ipynb                             # Exploratory data analysis
+├── sql/
+│   ├── schema.sql                            # Indexes and column reference
+│   ├── vw_borrower_default_profile.sql       # Dashboard 1 view
+│   ├── vw_risk_tier_delinquency.sql          # Dashboard 2 view
+│   └── vw_loan_performance_drivers.sql       # Dashboard 3 view
+├── src/
+│   ├── etl_load.py                           # Loads raw CSV into PostgreSQL
+│   └── export_views.py                       # Exports SQL views to CSVs
 ├── reports/
-│   ├── figures/          # Chart exports
-│   └── tables/           # Summary tables
-├── .env                  # Local DB credentials (excluded from git)
+│   ├── figures/                              # Chart exports
+│   └── tables/                              # Summary tables
+├── .env                                      # Local DB credentials (excluded from git)
 ├── .gitignore
 └── README.md
 ```
@@ -75,7 +91,13 @@ loan_performance_analysis_april_may_2025/
 - Tableau Desktop or Tableau Public
 - Python packages: `pandas`, `sqlalchemy`, `psycopg2-binary`, `python-dotenv`
 
+```bash
+pip install pandas sqlalchemy psycopg2-binary python-dotenv
+```
+
 ### Steps
+
+All scripts must be run from the **project root**, not from inside `src/`.
 
 1. **Download the raw data** from [Kaggle — LendingClub Dataset Full 2007–2018](https://www.kaggle.com/datasets/panchammahto/lendingclub-dataset-full-2007-to-2018) and place the file at `data/raw/accepted_2007_to_2018Q4.csv`
 
@@ -88,14 +110,23 @@ loan_performance_analysis_april_may_2025/
    PGDATABASE=your_database
    ```
 
-3. **Run the ETL script** to load data into PostgreSQL:
+3. **Run the ETL script** to load data into PostgreSQL (~5–15 minutes):
    ```bash
    python src/etl_load.py
    ```
 
-4. **Run SQL views** in `sql/` to create analytical aggregations
+4. **Run the SQL files** in pgAdmin or psql in this order:
+   ```
+   sql/schema.sql
+   sql/vw_borrower_default_profile.sql
+   sql/vw_risk_tier_delinquency.sql
+   sql/vw_loan_performance_drivers.sql
+   ```
 
-5. **Export CSVs** from the views into `data/processed/`
+5. **Export the views to CSV** for Tableau:
+   ```bash
+   python src/export_views.py
+   ```
 
 6. **Open Tableau** and connect to the CSVs in `data/processed/`
 
